@@ -15,6 +15,6 @@ the 'M1' command. This was made optional because 'M1' will be supported in a fut
 The default value for "Enable tool length compensation" was set to "No" because the Buildbotics
 Controller does not current support this capability. It is planned for a future release.
 
-"Write Simulation Data" was added because this post processor will automatically generay
+"Write Simulation Data" was added because this post processor will automatically generate
 simulation commands that are compatible with the CutViewer CNC simulator. Setting this to "Yes"
 puts this simulation in the comments in the g-code file.
