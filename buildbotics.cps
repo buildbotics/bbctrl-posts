@@ -55,7 +55,10 @@ properties = {
   optionalStop: false, // optional stop - Set to false for Buildbotics because no action is taken on M1 commands. We can change this back to true when the optional pause button is added to the user interface
                        // This generates an error if set to true and suggests that user change it in the Post Process dialoge
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  toolLengthCompensation: false //Added for Buildbotics, specifies whether to use tool length compensation. Buildbotics controller does not have a tool table so users will have to keep track of this manually if they use it
+  toolLengthCompensation: false, //Added for Buildbotics, specifies whether to use tool length compensation. Buildbotics controller does not have a tool table so users will have to keep track of this manually if they use it
+  skipFirstToolChange: false, //Added for customer that wanted to bypass first tool change because he puts the tool in himself before starting the program
+  zRetractHeight: 10
+
 };
 
 // user-defined property definitions
@@ -81,7 +84,13 @@ propertyDefinitions = {
   separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
   toolLengthCompensation: {title: "Enable tool length compensation",
     description: "Causes z-axis positions to be automatically adjusted for changing tool length if 'yes' is selected",
-    type:"boolean"}
+    type:"boolean"},
+  skipFirstToolChange: {title:"Skip first tool change",
+                        description: "if yes, tool change on the first section will be skipped",
+						type:"boolean"},
+  zRetractHeight: {title:"Set Z-axis retract height",
+                   description: "Hard codes the z-axis retract height. This is important when skipping first tool change.",
+				   type:"number"}
 };
 
 var 
@@ -161,7 +170,7 @@ function getParam(name) {
 
 function getParVal(p) {
   var result;
-  result = getGlobalParameter(p) * (unit ? 1 : 1/25.4);
+  result = getGlobalParameter(p) * (unit == MM ? 1 : 1/25.4);
   return result.toFixed(3);
 }
 
@@ -443,8 +452,8 @@ function onSection() {
   var insertToolCall = isFirstSection() ||
     currentSection.getForceToolChange && currentSection.getForceToolChange() ||
     (tool.number != getPreviousSection().getTool().number);
-  
   retracted = false; // specifies that the tool has been retracted to the safe plane
+  
   var newWorkOffset = isFirstSection() ||
     (getPreviousSection().workOffset != currentSection.workOffset); // work offset changes
   var newWorkPlane = isFirstSection() ||
@@ -474,7 +483,9 @@ function onSection() {
     }
   }
 
-  if (insertToolCall) {
+  if (isFirstSection() && properties.skipFirstToolChange) {
+    writeRetract(Z)
+  } else if (insertToolCall) {
     forceWorkPlane();
     
     setCoolant(COOLANT_OFF);
@@ -620,7 +631,6 @@ function onSection() {
       }
     }
   }
-
   forceXYZ();
 
   if (machineConfiguration.isMultiAxisConfiguration()) { // use 5-axis indexing for multi-axis mode
@@ -648,7 +658,6 @@ function onSection() {
   setCoolant(tool.coolant);
 
   forceAny();
-
   var initialPosition = getFramePosition(currentSection.getInitialPosition());
   if (!retracted && !insertToolCall) {
     if (getCurrentPosition().z < initialPosition.z) {
@@ -1257,7 +1266,7 @@ function writeRetract() {
       words.push("Y" + xyzFormat.format(machineConfiguration.hasHomePositionY() ? machineConfiguration.getHomePositionY() : 0));
       break;
     case Z:
-      words.push("Z" + xyzFormat.format(machineConfiguration.getRetractPlane()));
+      words.push("Z" + properties.zRetractHeight * (unit == MM ? 1 : 1/25.4) );
       retracted = true; // specifies that the tool has been retracted to the safe plane
       break;
     default:
@@ -1265,6 +1274,7 @@ function writeRetract() {
       return;
     }
   }
+  
   if (words.length > 0) {
     gMotionModal.reset();
     gAbsIncModal.reset();
