@@ -18,3 +18,7 @@ Controller does not current support this capability. It is planned for a future 
 "Write Simulation Data" was added because this post processor will automatically generate
 simulation commands that are compatible with the CutViewer CNC simulator. Setting this to "Yes"
 puts this simulation in the comments in the g-code file.
+
+"Set Z-axis retract height" feature was added to avoid confusion about retract height. 
+
+Modified the writeRetact program to simply make a rapid move (G0) to the retract height specified by the "Set Z-Axis retract height value". 
