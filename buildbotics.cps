@@ -1278,7 +1278,7 @@ function writeRetract() {
   if (words.length > 0) {
     gMotionModal.reset();
     gAbsIncModal.reset();
-    writeBlock(gFormat.format(0), gAbsIncModal.format(91), words); // retract
+    writeBlock(gFormat.format(0), gAbsIncModal.format(90), words); // retract
     writeBlock(gAbsIncModal.format(90));
   }
   zOutput.reset();
