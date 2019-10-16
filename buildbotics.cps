@@ -120,6 +120,7 @@ var xyzFormat = createFormat({decimals:(unit == MM ? 3 : 4)});
 var abcFormat = createFormat({decimals:3, forceDecimal:true, scale:DEG});
 var feedFormat = createFormat({decimals:(unit == MM ? 1 : 2)});
 var toolFormat = createFormat({decimals:0});
+var toolProbeFormat = createFormat({decimals:0, zeropad:true, width:3});
 var rpmFormat = createFormat({decimals:0});
 var secFormat = createFormat({decimals:3, forceDecimal:true}); // seconds - range 0.001-1000
 var taperFormat = createFormat({decimals:1, scale:DEG});
@@ -463,6 +464,7 @@ function onSection() {
     (!machineConfiguration.isMultiAxisConfiguration() && currentSection.isMultiAxis()) ||
     (!getPreviousSection().isMultiAxis() && currentSection.isMultiAxis() ||
       getPreviousSection().isMultiAxis() && !currentSection.isMultiAxis()); // force newWorkPlane between indexing and simultaneous operations
+
   if (insertToolCall || newWorkOffset || newWorkPlane) {
     
     // stop spindle before retract during tool change
@@ -544,6 +546,9 @@ function onSection() {
                                   getParam("tool_shoulderLength") + ", " +
                                   getParam("tool_fluteLength") + ")"  );
       break;
+    case TOOL_PROBE:
+      writeln("(TOOL/PROBE, " + getParam("tool_diameter") + ")")
+      break;
     default:
        writeln("(CAN'T SIMULATE TOOL TYPE [" + tool.getType() + "])")
     };
@@ -553,6 +558,7 @@ function onSection() {
     if (tool.comment) {
       writeComment(tool.comment);
     }
+
     var showToolZMin = false;
     if (showToolZMin) {
       if (is3D()) {
@@ -585,10 +591,12 @@ function onSection() {
     }
   }
   
-  if (insertToolCall ||
+  // modified code here to make sure that this is not a probe operation before setting spindle speed
+  if ((insertToolCall ||
       isFirstSection() ||
       (rpmFormat.areDifferent(spindleSpeed, sOutput.getCurrent())) ||
-      (tool.clockwise != getPreviousSection().getTool().clockwise)) {
+      (tool.clockwise != getPreviousSection().getTool().clockwise)) &&
+      !isProbeOperation()) {
     if (spindleSpeed < 1) {
       error(localize("Spindle speed out of range."));
       return;
@@ -600,7 +608,8 @@ function onSection() {
       sOutput.format(spindleSpeed), mFormat.format(tool.clockwise ? 3 : 4)
     );
   }
-
+  if (isProbeOperation() == true) return;
+  
   // wcs
   if (insertToolCall) { // force work offset when changing tool
     currentWorkOffset = undefined;
@@ -632,6 +641,8 @@ function onSection() {
     }
   }
   forceXYZ();
+  
+  if (isProbeOperation() == true) return;
 
   if (machineConfiguration.isMultiAxisConfiguration()) { // use 5-axis indexing for multi-axis mode
     // set working plane after datum shift
@@ -714,6 +725,7 @@ function onSection() {
   }
 }
 
+
 function onDwell(seconds) {
   if (seconds > 99999.999) {
     warning(localize("Dwelling time is out of range."));
@@ -728,6 +740,18 @@ function onSpindleSpeed(spindleSpeed) {
 
 function onCycle() {
   writeBlock(gPlaneModal.format(17));
+  writeBlock("F" + cycle.feedrate)
+  if (isProbeOperation() == true) {
+    switch (cycleType) {
+    case 'probing-xy-outer-corner':
+    case 'probing-z':
+    case 'probing-x':
+    case 'probing-y':
+      break;
+    default:
+      warning('cycleType: ' + cycleType + ' not supported') 
+    }
+  }
 }
 
 function getCommonCycle(x, y, z, r) {
@@ -741,6 +765,66 @@ function getCommonCycle(x, y, z, r) {
 to individual g-code commands and returns.*/
 function onCyclePoint(x, y, z) {
   switch (cycleType) {
+  case "probing-xy-outer-corner":
+    writeComment(cycleType)
+    value1 = (cycle.approach1 == 'positive') ? 1 : -1; 
+    value2 = (cycle.approach2 == 'positive') ? 1 : -1;
+    offset = (cycle.probeClearance + tool.diameter/2)
+
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"Y" + (y + value2 * (2 * offset)))
+    writeBlock(gFormat.format(1),"Z" + -tool.diameter/2)
+    writeBlock(gFormat.format(91))
+    writeBlock(gFormat.format(38) + ".2 X" + value1 * (offset + cycle.probeOvertravel))
+    writeBlock(gFormat.format(92), "X" + (x + value1 * (offset - tool.diameter / 2)))
+    writeBlock(gFormat.format(90))
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"Y" + y)
+
+    writeComment("probing y")
+    writeBlock(gFormat.format(0),"X" + (x + value1 * (2 * offset)))
+    writeBlock(gFormat.format(1),"Z" + -tool.diameter/2)
+    writeBlock(gFormat.format(91))
+    writeBlock(gFormat.format(38) + ".2 Y" + value2 * (offset + cycle.probeOvertravel))
+    writeBlock(gFormat.format(92), "Y" + (y + value2 * (offset - tool.diameter / 2)))
+    writeBlock(gFormat.format(90))
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"X" + (x + value1 * offset), "Y" + (y + value2 * offset))
+    return;
+  case "probing-x":
+    writeComment(cycleType)
+    value = (cycle.approach1 == 'positive') ? 1 : -1;      
+    offset = (cycle.probeClearance + tool.diameter/2)
+    writeBlock(gFormat.format(0),"Z" + -tool.diameter/2)
+    writeBlock(gFormat.format(91))
+    writeBlock(gFormat.format(38) + ".2 X" + value * (cycle.retract + cycle.probeOvertravel))
+    writeBlock(gFormat.format(92), "X" + (x + value * (offset - tool.diameter / 2)))
+    writeBlock(gFormat.format(90))
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"X" + 0,"Y" + 0)
+    return;
+  case "probing-y":
+    writeComment(cycleType)
+    value = (cycle.approach1 == 'positive') ? 1 : -1;      
+    offset = (cycle.probeClearance + tool.diameter/2)
+    writeBlock(gFormat.format(0),"Z" + -tool.diameter/2)
+    writeBlock(gFormat.format(91))
+    writeBlock(gFormat.format(38) + ".2 Y" + value * (cycle.retract + cycle.probeOvertravel))
+    writeBlock(gFormat.format(92), "Y" + (y + value * (offset - tool.diameter / 2)))
+    writeBlock(gFormat.format(90))
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"X" + 0,"Y" + 0)
+    return;
+  case "probing-z":
+    writeComment(cycleType)
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(91))
+    writeBlock(gFormat.format(38) + ".2 Z" + (-cycle.retract - cycle.probeOvertravel))
+    writeBlock(gFormat.format(92), "Z" + 0)
+    writeBlock(gFormat.format(90))
+    writeBlock(gFormat.format(0),"Z" + cycle.retract)
+    writeBlock(gFormat.format(0),"X" + 0,"Y" + 0)
+    return;
   case "probe":
   case "tapping":
   case "left-tapping":
@@ -1278,7 +1362,7 @@ function writeRetract() {
   if (words.length > 0) {
     gMotionModal.reset();
     gAbsIncModal.reset();
-    writeBlock(gFormat.format(0), gAbsIncModal.format(90), words); // retract
+    writeBlock(gFormat.format(0), gAbsIncModal.format(91), words); // retract
     writeBlock(gAbsIncModal.format(90));
   }
   zOutput.reset();
