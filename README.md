@@ -21,4 +21,11 @@ puts this simulation in the comments in the g-code file.
 
 "Set Z-axis retract height" feature was added to avoid confusion about retract height. 
 
-Modified the writeRetact program to simply make a rapid move (G0) to the retract height specified by the "Set Z-Axis retract height value". 
+Modified the writeRetact program to simply make a rapid move (G0) to the retract height specified by the "Set Z-Axis retract height value".
+
+## Probing support added on 10/10/19
+The following types of probing are now supported:
+  * probing-xy-outer-corner
+  * probing-x
+  * probing-y
+  * probing-z
