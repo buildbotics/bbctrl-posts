@@ -19,7 +19,9 @@ Controller does not current support this capability. It is planned for a future 
 simulation commands that are compatible with the CutViewer CNC simulator. Setting this to "Yes"
 puts this simulation in the comments in the g-code file.
 
-"Set Z-axis retract height" feature was added to avoid confusion about retract height. 
+"Set Z-axis retract height" feature was added to avoid confusion about retract height.
+
+"Disable coolant control" feature was added so users that want to use the Load1 or Load2 outputs for something other than coolant control, or to just manually control coolant can prevent F360 from generating coolant control commands in the GCode. The default value for this field is "No", meaning that coolant control is not disabled. Set this field to "Yes" to turn off coolant control commands in F360.
 
 Modified the writeRetact program to simply make a rapid move (G0) to the retract height specified by the "Set Z-Axis retract height value".
 
