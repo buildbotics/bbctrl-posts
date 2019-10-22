@@ -57,7 +57,8 @@ properties = {
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
   toolLengthCompensation: false, //Added for Buildbotics, specifies whether to use tool length compensation. Buildbotics controller does not have a tool table so users will have to keep track of this manually if they use it
   skipFirstToolChange: false, //Added for customer that wanted to bypass first tool change because he puts the tool in himself before starting the program
-  zRetractHeight: 10
+  zRetractHeight: 10,
+  disableCoolantControl: false
 
 };
 
@@ -90,7 +91,10 @@ propertyDefinitions = {
 						type:"boolean"},
   zRetractHeight: {title:"Set Z-axis retract height",
                    description: "Hard codes the z-axis retract height. This is important when skipping first tool change.",
-				   type:"number"}
+				   type:"number"},
+  disableCoolantControl: {title:"Disable coolant control",
+						  description: "Set to yes to disable coolant control commands in the GCode program. Set this to true if the Load1 or Load2 outputs on the Buildbotics Controller are used for something other than coolant control",
+						  type: "boolean"}
 };
 
 var 
@@ -1169,6 +1173,7 @@ var currentCoolantMode = undefined;
 var coolantOff = undefined;
 
 function setCoolant(coolant) {
+  if (properties.disableCoolantControl == true) {return false;}
   var coolantCodes = getCoolantCodes(coolant);
   if (Array.isArray(coolantCodes)) {
     for (var c in coolantCodes) {
