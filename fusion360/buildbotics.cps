@@ -97,6 +97,8 @@ propertyDefinitions = {
 						  type: "boolean"}
 };
 
+var permittedCommentChars = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,=_-";
+
 var 
 numberOfToolSlots = 9999;
 
