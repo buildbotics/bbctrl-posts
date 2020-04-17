@@ -215,10 +215,6 @@ function writeBlock() {
   }
 }
 
-//function formatComment(text) {
-//  return "(" + String(text).replace(/[()]/g, "") + ")";
-//}
-
 function formatComment(text) {
   return "(" + filterText(String(text).toUpperCase(), permittedCommentChars) + ")";
 }
