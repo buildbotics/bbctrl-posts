@@ -1,0 +1,18 @@
+Order of operations for editing Post Processors for SolidWorks
+
+1. Open the .scr source file that you want to work on in Ec Edit 
+2. Check the LIBRARY paths are correct, the first should point at the local .lib file, the second at the general .lib file usually located in C:\CAMWorksData\UPG\MasterLibraryFiles\MILL.LIB
+3. Open the local.lib file in Ec Edit
+4. once you are done with your editing, save the file in Ec Edit. 
+5. Open up UPG and open the source file that you had open in Ec Edit. It is best to have the source file saved on the local machine and not a network drive.
+6. When the source file is open, click 'File' -> 'Compile Source' and then compile
+7. The .ctl file and .lib file will now be updated with the new changes. It is much safer to compile and edit the files on the local machine, then copy them to a directory where Solidworks reads 
+	the ctl files from. For example, I compile the ctl and lib files to C:\CAMWorksData\UPG\ctl, and then manually copy them to C:\ProgramData\SOLIDWORKS\SOLIDWORKS CAM 2019\Posts, which is the 
+	default SolidWorks post directory. If there is already a file in that directory with the same name because you are updating a file that you have used in the past, it is fine to overwrite it. 
+8. Open SolidWorks and in the CAM section, click on 'Define Machine'. Inside there, go to the 'Post Processor' tab and click on 'Browse', it should default to the normal directory which is the 
+	same location that you just copied your ctl file to. 
+9. Inside there select your updated ctl file (check the timestamp to be sure that you are selecting the new version). It should then add the updated file to the available post processor list. 
+10. Click the 'Select' button a few times to ensure it has selected it, and you should see the Active Post Processor file field update with the new file name. If you ever start getting errors in 
+	the post processor generation, it is wise to come back and check that the correct post processor is selsected, it likes to default back to a random one. It is also wise to always click the 
+	Select' button several times to ensure it accept the new post processor. 
+11. Now you have your updated post processor accepted into SolidWorks. Go ahead and do all your normal process for creating a post process file, ensureing to save it in a .ns file format. 

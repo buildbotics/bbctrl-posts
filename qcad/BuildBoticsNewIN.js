@@ -5,7 +5,7 @@
  */
 include("GCodeBase.js");
 
-function BuildBoticsIN(cadDocumentInterface, camDocumentInterface) {
+function BuildBoticsNewIN(cadDocumentInterface, camDocumentInterface) {
     GCodeBase.call(this, cadDocumentInterface, camDocumentInterface);
 
     this.decimals = 4;
@@ -39,21 +39,22 @@ function BuildBoticsIN(cadDocumentInterface, camDocumentInterface) {
     
     this.toolpathFooter = [
 		"(End Tool Path [TOOLPATH_INDEX]: [TOOLPATH_NAME])",
+        "[N] M6 [T]",
 		""
     ];
     
 }
 
 // Configuration is derived from GCodeBase:
-BuildBoticsIN.prototype = new GCodeBase();
+BuildBoticsNewIN.prototype = new GCodeBase();
 
 // Display name shown in user interface:
-BuildBoticsIN.displayName = "BuildBotics [in]";
+BuildBoticsNewIN.displayName = "BuildBotics [in]";
 
 /**
  * Write tool list in header.
  */
-BuildBoticsIN.prototype.writeHeader = function() {
+BuildBoticsNewIN.prototype.writeHeader = function() {
     this.writeBlock("header");
 
     // backup member variables:
