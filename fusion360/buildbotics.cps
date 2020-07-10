@@ -1018,7 +1018,7 @@ function onRadiusCompensation() {
 }
 
 // Added by Doug Coffland to allow support for plasma and laser cutting
-var onPower(power) {
+function onPower(power) {
     writeBlock(mFormat.format(power ? 3 : 5), conditional(power, qFormat.format(power)));
 }
 
