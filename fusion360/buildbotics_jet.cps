@@ -284,7 +284,7 @@ function onSection() {
       if (properties.useG0) {
         writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
       } else {
-        writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
+        writeBlock(gMotionModal.format(1), zOutput.format(properties.pierceHeight), feedOutput.format(highFeedrate));
       }
       zIsOutput = true;
     }
