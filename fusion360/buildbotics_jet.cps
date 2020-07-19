@@ -18,6 +18,7 @@ vendorUrl = "https://buildbotics.com";
 legal = "Copyright (C) 2012-2019 by Autodesk, Inc.";
 certificationLevel = 2;
 minimumRevision = 24000;
+highFeedrate = (unit == IN) ? 100 : 2500;
 
 longDescription = "Generic post for Buildbotics Jet cutting.";
 
@@ -43,8 +44,6 @@ properties = {
   sequenceNumberIncrement: 1, // increment for sequence numbers
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
   pierceDelay: 1, // specifies the delay to pierce in seconds
-  probeOffset: 0, // specifies the offset for G31 probing
-  probe: false, // probing
   useZAxis: false, // specifies to enable the output for Z coordinates
   pierceHeight: 0, // specifies the pierce height
   useG0: true // toggle between using G0 or G1 with a highFeedrate for rapid movements
@@ -62,8 +61,6 @@ propertyDefinitions = {
   separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
 
   pierceDelay: {title:"Pierce delay", description:"Specifies the delay to pierce in seconds.", type:"number"},
-  probeOffset: {title:"Probe offset", description:"Specifies the offset for G31 probing.", type:"number"},
-  probe: {title:"Probe", description:"Specifies whether to use probing.", type:"boolean"},
   useZAxis: {title:"Use Z axis", description:"Specifies to enable the output for Z coordinates.", type:"boolean"},
   pierceHeight: {title:"Pierce Height", description:"Specifies the pierce height.", type:"number"},
   useG0: {title:"Use G0", description:"Toggle between using G0 or G1 with a highFeedrate for rapid movements.", type:"boolean"}
@@ -147,7 +144,14 @@ function getPowerMode(section) {
 }
 
 function onOpen() {
-  
+
+  if (properties.useZAxis) {
+    zFormat.setOffset(properties.pierceHeight);
+    zOutput = createVariable({prefix:"Z"}, zFormat);
+  } else {
+    zOutput.disable();
+  }
+
   if (!properties.separateWordsWithSpace) {
     setWordSeparator("");
   }
@@ -259,24 +263,6 @@ function onSection() {
     error(localize("The CNC does not support the required tool/process. Only laser cutting is supported."));
     return;
   }
-  
-  // wcs
-  var workOffset = currentSection.workOffset;
-  if (workOffset == 0) {
-    warningOnce(localize("Work offset has not been specified. Using G54 as WCS."), WARNING_WORK_OFFSET);
-    workOffset = 1;
-  }
-  if (workOffset > 0) {
-    if (workOffset > 6) {
-      error(localize("Work offset out of range."));
-      return;
-    } else {
-      if (workOffset != currentWorkOffset) {
-        writeBlock(gFormat.format(53 + workOffset)); // G54->G59
-        currentWorkOffset = workOffset;
-      }
-    }
-  }
 
   { // pure 3D
     var remaining = currentSection.workPlane;
@@ -286,11 +272,36 @@ function onSection() {
     }
     setRotation(remaining);
   }
-  
-  writeBlock(mFormat.format(3), sOutput.format(power) );
+
+  forceAny();
 
   var initialPosition = getFramePosition(currentSection.getInitialPosition());
-  writeBlock(gMotionModal.format(0), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y));
+  var zIsOutput = false;
+  if (properties.useZAxis) {
+    var previousFinalPosition = isFirstSection() ? initialPosition : getFramePosition(getPreviousSection().getFinalPosition());
+    if (xyzFormat.getResultingValue(previousFinalPosition.z) <= xyzFormat.getResultingValue(initialPosition.z)) {
+      if (properties.useG0) {
+        writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
+      } else {
+        writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
+      }
+      zIsOutput = true;
+    }
+  } 
+ 
+  if (properties.useG0) {
+    writeBlock(gMotionModal.format(0), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y));
+  } else {
+    writeBlock(gMotionModal.format(1), xOutput.format(initialPosition.x), yOutput.format(initialPosition.y), feedOutput.format(highFeedrate));
+  }
+
+  if (properties.useZAxis && !zIsOutput) {
+    if (properties.useG0) {
+      writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
+    } else {
+      writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
+    }
+  }
 }
 
 function onDwell(seconds) {
@@ -307,7 +318,26 @@ function onRadiusCompensation() {
   pendingRadiusCompensation = radiusCompensation;
 }
 
+var powerIsOn = false
 function onPower(power) {
+  writeBlock(mFormat.format(power ? 3 : 5));
+  powerIsOn = power;
+  if (power) {
+    onDwell(properties.pierceDelay);
+    if (zFormat.isSignificant(properties.pierceHeight)) {
+      feedOutput.reset();
+      var f = (hasParameter("operation:tool_feedEntry") ? getParameter("operation:tool_feedEntry") : toPreciseUnit(1000, MM));
+      zFormat.setOffset(0);
+      zOutput = createVariable({prefix:"Z"}, zFormat);
+      writeBlock(gMotionModal.format(1), zOutput.format(getCurrentPosition().z), feedOutput.format(f));
+    }
+  } else {
+    if (zFormat.isSignificant(properties.pierceHeight)) {
+      zFormat.setOffset(properties.pierceHeight);
+      zOutput = createVariable({prefix:"Z"}, zFormat);
+    }
+    writeln("");
+  }
 }
 
 function onRapid(_x, _y, _z) {
@@ -318,7 +348,11 @@ function onRapid(_x, _y, _z) {
       error(localize("Radius compensation mode cannot be changed at rapid traversal."));
       return;
     }
-    writeBlock(gMotionModal.format(0), x, y);
+    if (properties.useG0) {
+      writeBlock(gMotionModal.format(0), x, y, z);
+    } else {
+      writeBlock(gMotionModal.format(1), x, y, z, feedOutput.format(highFeedrate));
+    }
     feedOutput.reset();
   }
 }
