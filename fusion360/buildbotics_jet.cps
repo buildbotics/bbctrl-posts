@@ -298,7 +298,7 @@ function onSection() {
 
   if (properties.useZAxis && !zIsOutput) {
     if (properties.useG0) {
-      writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
+      writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
     } else {
       writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
     }
@@ -321,16 +321,18 @@ function onRadiusCompensation() {
 
 var powerIsOn = false
 function onPower(power) {
-  writeBlock(mFormat.format(power ? 3 : 5));
+  //writeBlock(mFormat.format(power ? 3 : 5));
   powerIsOn = power;
   if (power) {
-    onDwell(properties.pierceDelay);
+    //onDwell(properties.pierceDelay);
     if (zFormat.isSignificant(properties.pierceHeight)) {
       feedOutput.reset();
       var f = (hasParameter("operation:tool_feedEntry") ? getParameter("operation:tool_feedEntry") : toPreciseUnit(1000, MM));
       zFormat.setOffset(0);
       zOutput = createVariable({prefix:"Z"}, zFormat);
       writeBlock(gMotionModal.format(1), zOutput.format(getCurrentPosition().z), feedOutput.format(f));
+      writeBlock(mFormat.format(power ? 3 : 5));
+      onDwell(properties.pierceDelay);
     }
   } else {
     if (zFormat.isSignificant(properties.pierceHeight)) {
