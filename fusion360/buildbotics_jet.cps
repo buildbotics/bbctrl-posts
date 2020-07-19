@@ -324,11 +324,11 @@ function onPower(power) {
   writeComment("pierce height = " + properties.pierceHeight)
   writeComment("current z pos = " + getCurrentPosition().z)
   if (properties.useZAxis && power) {
-    zFormat.setOffset(properties.pierceHeight + getCurrentPosition().z);
+    zFormat.setOffset(properties.pierceHeight);
     if (properties.useG0) {
-      writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
+      writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight + getCurrentPosition().z));
     } else {
-      writeBlock(gMotionModal.format(1), zOutput.format(properties.pierceHeight), feedOutput.format(highFeedrate));
+      writeBlock(gMotionModal.format(1), zOutput.format(properties.pierceHeight + getCurrentPosition().z), feedOutput.format(highFeedrate));
     }
     zFormat.setOffset(0);
   }
