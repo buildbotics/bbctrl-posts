@@ -73,6 +73,7 @@ var gFormat = createFormat({prefix:"G", decimals:0});
 var mFormat = createFormat({prefix:"M", decimals:0});
 
 var xyzFormat = createFormat({decimals:(unit == MM ? 3 : 4)});
+var zFormat = createFormat({decimals:(unit == MM ? 3 : 4), forceDecimal:true});
 var feedFormat = createFormat({decimals:(unit == MM ? 1 : 2)});
 var toolFormat = createFormat({decimals:0});
 var powerFormat = createFormat({decimals:0});
