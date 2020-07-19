@@ -282,9 +282,9 @@ function onSection() {
     var previousFinalPosition = isFirstSection() ? initialPosition : getFramePosition(getPreviousSection().getFinalPosition());
     if (xyzFormat.getResultingValue(previousFinalPosition.z) <= xyzFormat.getResultingValue(initialPosition.z)) {
       if (properties.useG0) {
-        writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
+        writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
       } else {
-        writeBlock(gMotionModal.format(1), zOutput.format(properties.pierceHeight), feedOutput.format(highFeedrate));
+        writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
       }
       zIsOutput = true;
     }
