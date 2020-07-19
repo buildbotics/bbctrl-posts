@@ -345,6 +345,8 @@ function onPower(power) {
       zFormat.setOffset(0);
       zOutput = createVariable({prefix:"Z"}, zFormat);
     }
+
+    initialPosition = getFramePosition(currentSection.getInitialPosition());
     if (properties.useG0) {
       writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
     } else {
