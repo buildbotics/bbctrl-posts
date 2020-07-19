@@ -344,6 +344,7 @@ function onPower(power) {
 function onRapid(_x, _y, _z) {
   var x = xOutput.format(_x);
   var y = yOutput.format(_y);
+  var z = zOutput.format(_z);
   if (x || y) {
     if (pendingRadiusCompensation >= 0) {
       error(localize("Radius compensation mode cannot be changed at rapid traversal."));
