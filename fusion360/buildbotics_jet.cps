@@ -282,7 +282,7 @@ function onSection() {
     var previousFinalPosition = isFirstSection() ? initialPosition : getFramePosition(getPreviousSection().getFinalPosition());
     if (xyzFormat.getResultingValue(previousFinalPosition.z) <= xyzFormat.getResultingValue(initialPosition.z)) {
       if (properties.useG0) {
-        writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
+        writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
       } else {
         writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
       }
@@ -298,7 +298,7 @@ function onSection() {
 
   if (properties.useZAxis && !zIsOutput) {
     if (properties.useG0) {
-      writeBlock(gMotionModal.format(0), zOutput.format(initialPosition.z));
+      writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
     } else {
       writeBlock(gMotionModal.format(1), zOutput.format(initialPosition.z), feedOutput.format(highFeedrate));
     }
