@@ -13,7 +13,7 @@
 */
 
 description = "Buildbotics Jet";
-vendor = "buildbotics jet";
+vendor = "Buildbotics LLC";
 vendorUrl = "https://buildbotics.com";
 legal = "Copyright (C) 2012-2019 by Autodesk, Inc.";
 certificationLevel = 2;
@@ -42,9 +42,15 @@ properties = {
   sequenceNumberStart: 10, // first sequence number
   sequenceNumberIncrement: 1, // increment for sequence numbers
   separateWordsWithSpace: true, // specifies that the words should be separated with a white space
-  throughPower: 255, // set the Laser Power for though cutting
-  etchPower: 50, // set the power for etching
-  vaporizePower: 255 // set the power for vaporize
+  pierceDelay: 1, // specifies the delay to pierce in seconds
+  probeOffset: 0, // specifies the offset for G31 probing
+  probe: false, // probing
+  useZAxis: false, // specifies to enable the output for Z coordinates
+  pierceHeight: 0, // specifies the pierce height
+  useG0: true // toggle between using G0 or G1 with a highFeedrate for rapid movements
+  //throughPower: 255, // set the Laser Power for though cutting
+  //etchPower: 50, // set the power for etching
+  //vaporizePower: 255 // set the power for vaporize
 };
 
 // user-defined property definitions
@@ -54,9 +60,16 @@ propertyDefinitions = {
   sequenceNumberStart: {title:"Start sequence number", description:"The number at which to start the sequence numbers.", group:1, type:"integer"},
   sequenceNumberIncrement: {title:"Sequence number increment", description:"The amount by which the sequence number is incremented by in each block.", group:1, type:"integer"},
   separateWordsWithSpace: {title:"Separate words with space", description:"Adds spaces between words if 'yes' is selected.", type:"boolean"},
-  throughPower: {title: "Through power", description: "Sets the laser power used for through cutting.", type: "number"},
-  etchPower: {title:"Etch power", description:"Sets the laser power used for etching.", type:"number"},
-  vaporizePower: {title:"Vaporize power", description:"Sets the laser power used for vaporize cutting.", type:"number"}
+
+  pierceDelay: {title:"Pierce delay", description:"Specifies the delay to pierce in seconds.", type:"number"},
+  probeOffset: {title:"Probe offset", description:"Specifies the offset for G31 probing.", type:"number"},
+  probe: {title:"Probe", description:"Specifies whether to use probing.", type:"boolean"},
+  useZAxis: {title:"Use Z axis", description:"Specifies to enable the output for Z coordinates.", type:"boolean"},
+  pierceHeight: {title:"Pierce Height", description:"Specifies the pierce height.", type:"number"},
+  useG0: {title:"Use G0", description:"Toggle between using G0 or G1 with a highFeedrate for rapid movements.", type:"boolean"}
+  //throughPower: {title: "Through power", description: "Sets the laser power used for through cutting.", type: "number"},
+  //etchPower: {title:"Etch power", description:"Sets the laser power used for etching.", type:"number"},
+  //vaporizePower: {title:"Vaporize power", description:"Sets the laser power used for vaporize cutting.", type:"number"}
 };
 
 var gFormat = createFormat({prefix:"G", decimals:0});
