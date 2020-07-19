@@ -147,7 +147,7 @@ function getPowerMode(section) {
 function onOpen() {
 
   if (properties.useZAxis) {
-    zFormat.setOffset(properties.pierceHeight);
+    zFormat.setOffset(0);
     zOutput = createVariable({prefix:"Z"}, zFormat);
   } else {
     zOutput.disable();
