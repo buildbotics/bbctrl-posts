@@ -321,10 +321,8 @@ function onRadiusCompensation() {
 
 var powerIsOn = false
 function onPower(power) {
-  writeComment("pierce height = " + properties.pierceHeight)
-  writeComment("current z pos = " + getCurrentPosition().z)
   if (properties.useZAxis && power) {
-    zFormat.setOffset(properties.pierceHeight);
+    //zFormat.setOffset(properties.pierceHeight);
     if (properties.useG0) {
       writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight + getCurrentPosition().z));
     } else {
@@ -332,7 +330,7 @@ function onPower(power) {
     }
     zFormat.setOffset(0);
   }
-  writeBlock(mFormat.format(power ? 3 : 5));
+  writeBlock(mFormat.format(power ? 3 : 5), ' S1');
   powerIsOn = power;
   if (power) {
     onDwell(properties.pierceDelay);
