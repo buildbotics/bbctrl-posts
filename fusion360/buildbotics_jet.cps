@@ -335,9 +335,10 @@ function onPower(power) {
     if (zFormat.isSignificant(properties.pierceHeight)) {
       feedOutput.reset();
       var f = (hasParameter("operation:tool_feedEntry") ? getParameter("operation:tool_feedEntry") : toPreciseUnit(1000, MM));
-      zFormat.setOffset(0);
+      zFormat.setOffset(properties.pierceHeight);
       zOutput = createVariable({prefix:"Z"}, zFormat);
       writeBlock(gMotionModal.format(1), zOutput.format(getCurrentPosition().z), feedOutput.format(f));
+      zFormat.setOffset(0);
     }
   } else {
     if (zFormat.isSignificant(properties.pierceHeight)) {
