@@ -324,7 +324,7 @@ function onPower(power) {
   writeComment("pierce height = " + properties.pierceHeight)
   writeComment("current z pos = " + getCurrentPosition().z)
   if (properties.useZAxis && power) {
-    zFormat.setOffset(properties.pierceHeight);
+    zFormat.setOffset(properties.pierceHeight + getCurrentPosition().z);
     if (properties.useG0) {
       writeBlock(gMotionModal.format(0), zOutput.format(properties.pierceHeight));
     } else {
