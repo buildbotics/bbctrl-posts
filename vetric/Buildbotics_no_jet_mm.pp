@@ -127,7 +127,6 @@ begin FEED_MOVE
 
 begin FIRST_CW_ARC_MOVE
 
-"G4 P0.1"
 "G2[X][Y][I][J][F]"
  
  
@@ -137,7 +136,6 @@ begin FIRST_CW_ARC_MOVE
  
 begin CW_ARC_MOVE
  
-"G4 P0.1"
 "G2[X][Y][I][J]"
  
  
@@ -147,7 +145,6 @@ begin CW_ARC_MOVE
  
 begin FIRST_CCW_ARC_MOVE
  
-"G4 P0.1"
 "G3[X][Y][I][J][F]"
  
  
@@ -157,7 +154,6 @@ begin FIRST_CCW_ARC_MOVE
  
 begin CCW_ARC_MOVE
  
-"G4 P0.1"
 "G3[X][Y][I][J]"
 
 
