@@ -1134,6 +1134,9 @@ function onCircular(clockwise, cx, cy, cz, x, y, z, feed) {
     return;
   }
 
+  // temporary fix added by Doug Coffland to work around sequential arcs bug
+  writeBlock("G4 P0.1")
+
   var start = getCurrentPosition();
 
   if (isFullCircle()) {
