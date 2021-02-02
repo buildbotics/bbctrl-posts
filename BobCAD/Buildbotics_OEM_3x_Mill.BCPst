@@ -1,0 +1,941 @@
+﻿// Mill
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+//--BobCAD-CAM Mill Post Processor ------------------------------------
+//---------------------------------------------------------------------
+//-- Initial Software Version: BobCAD-CAM V33
+//-- Initial Creation Date: 12-03-2020
+//-- Author: MH
+//-- Controller: Buildbotics (v0.4.15)
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+//--REVISION LOG ------------------------------------------------------
+//---------------------------------------------------------------------
+//-- 10/29/2020 - MH
+//--  1) Initial post-processor creation for V33
+//--  2) Disabled fine boring, back boring, tapping, and peck drilling
+//--	 (G83) cycles
+//--  3) Arc center format is set to radius and arcs are broken into
+//--	 quadrants
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+//--SPECIAL NOTES ABOUT THIS POST AND MACHINE -------------------------
+//---------------------------------------------------------------------
+//-- 12/30/2020 - MH
+//--  1) This machine doesn't accept cutter dimater compensation codes
+//--	 (G41/G42) so variable "cc" was removed from blocks 56 and 57
+//---------------------------------------------------------------------
+
+****Version Number MONTH DAY YEAR****
+1000. Version Information = Version Month Day Year? "11.0 10 29 2020"
+
+0. File header
+	n,measure_mode
+	n,"(FILE: ",single_quote,prog_name,single_quote,")"
+	n,"G91.1"
+	
+1. Start of file programmed zero
+
+2. Start of file Standard
+	n,force_feed_rate_on,feed_rate,force_feed_rate_off
+	n,movement_mode
+	n,spindle_on,s
+	n,"M6",t
+	output_primary_rotary_index
+	output_secondary_rotary_index
+	n,force_x,force_y,rapid_move,xr,yr,p_rot,s_rot
+	n,force_z,rapid_move,zr
+
+3. Tool change
+	n,force_feed_rate_on,feed_rate,force_feed_rate_off
+	n,movement_mode
+	n,spindle_on,s
+	n,"M6",t
+	output_primary_rotary_index
+	output_secondary_rotary_index
+	n,force_x,force_y,rapid_move,xr,yr,p_rot,s_rot
+	n,force_z,rapid_move,zr
+
+4. Null tool change
+	n,force_feed_rate_on,feed_rate,force_feed_rate_off
+	n,movement_mode
+	//n,spindle_on,s
+	//n,"M6",t
+	output_primary_rotary_index
+	output_secondary_rotary_index
+	n,force_x,force_y,rapid_move,xr,yr,p_rot,s_rot
+	n,force_z,rapid_move,zr
+
+5. End of file for non-zero tool
+	n,end_of_file
+
+7. Sub program call
+	n,sub_call,sub_num,comment_start,"SUBPROGRAM CALL",comment_end
+
+8. Sub definition
+	sub_num_with_prefix,sub_comment
+
+9. Sub program return
+	n,sub_return,comment_start,"SUBPROGRAM RETURN",comment_end
+
+10. Rotary axis index string
+	n,rapid_move,primary_rotary_angle_output
+
+11. Cancel cutter compensation
+	"G40"
+
+12. Cutter compensation left
+	"G41"
+
+13. Cutter compensation right
+	"G42"
+
+14. Tool length compensation
+
+15. First Machine Setup
+
+16. Machine Setup Change
+	comment_start,"NEXT MACHINE SETUP - ",setup_name,comment_end
+
+17.Second_Rotary axis index string
+	n,rapid_move,secondary_rotary_angle_output
+
+18.Third_Rotary axis index string
+
+19. End of Operation.
+
+20. Spindle speed low range
+	"M41","(LOW RANGE SPINDLE)"
+
+21. Spindle speed high range
+	"M42","(HIGH RANGE SPINDLE)"
+
+22. Rigid tapping start.
+
+23. Rigid tapping end.
+
+24. File trailer.
+	
+25. Format for offset when using offset registers.
+
+26. Set debug.
+	debug_off
+
+27. First Rapid Move.
+	n,rapid_move,zr
+
+28. Rapid Move.
+	n,rapid_move,zr
+
+30. Initial positioning code for operation not on transform plane
+ 
+31. Initial positioning code for operation on transform plane
+	
+32. End code for operation not on transform plane
+
+33. End code for operation on transform plane	
+
+39. Part Number.
+
+40. Start of 2axis contour.
+
+41. End of contour.
+
+45. 5 axis tool length compensation
+
+50. Line first rapid move Z.
+	n,rapid_move,zr,p_rot,s_rot
+
+51. Line feed move Z.G41
+	n,feed_move,z_f,p_rot,s_rot
+
+52. Line rapid move XY.
+	n,rapid_move,xr,yr,p_rot,s_rot
+
+53. Line feed move XY.
+	n,feed_move,x_f,y_f,p_rot,s_rot
+
+54. Line rapid move XYZ.
+	n,rapid_move,xr,yr,zr,p_rot,s_rot
+
+55. Line feed move XYZ.
+	n,feed_move,x_f,y_f,z_f,p_rot,s_rot
+
+56. Line feed move XY on Leadin.
+	n,feed_move,x_f,y_f
+
+57. Line feed move XY on Leadout.
+	n,feed_move,x_f,y_f
+
+64. Arc move XY.
+	n,g_arc_plane,g_arc_move,x_f,y_f,z_f,arc_center
+
+65. Arc move YZ.
+	n,g_arc_plane,g_arc_move,y_f,z_f,x_f,arc_center
+
+66. Arc move XZ.
+	n,g_arc_plane,g_arc_move,z_f,x_f,y_f,arc_center
+
+71. End of 2axis cutting.
+
+73. High speed peck drill canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,program_block_1
+
+74. Left handed tapping canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane
+
+76. Fine boring canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,program_block_1,dwell
+
+80. Drill canned cycle cancel.
+	n,cancel_drill_cycle
+
+81. Standard drill canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane
+
+82. Standard drill canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,dwell
+
+83. Peck drill canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,program_block_1
+
+84. Tapping canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane
+
+85. Boring cycle #1 canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane
+
+86. Boring cycle #2 canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane
+
+87. Back boring cycle canned cycle.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,program_block_1,dwell
+
+88. Boring cycle #1 canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,dwell
+
+89. Boring cycle #2 canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,x_f,y_f,drill_depth,reference_plane,dwell
+
+90. Canned cycle drill point format WITH SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+91. Canned cycle drill point format for standard drill canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+92. Canned cycle drill point format for standard drill canned cycle with dwell NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+93. Canned cycle drill point format for peck drill canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+94. Canned cycle drill point format for tapping canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+95. Canned cycle drill point format for boring cycle #1 canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+96. Canned cycle drill point format for boring cycle #2 canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+97. Canned cycle drill point format for back boring cycle canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+98. Canned cycle drill point format for boring cycle #1 canned cycle with dwell NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+99. Canned cycle drill point format for boring cycle #2 canned cycle with dwell NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+100. Absolute coordinate output.
+	absolute_coord
+
+101. Incremental coordinate output.
+	incremental_coord
+
+108. Rectangular stock format.
+	"(SBOX","X",stock_min_x,"Y",stock_min_y,"Z",stock_min_z,"L",stock_length,"W",stock_width, "H",stock_height,")"
+
+109. Rotary stock format.
+	"(SCYL",rotation_axis,"X0","Y0","Z0",rotary_stock_diameter,rotary_stock_length,")"
+
+110. Tool list format.
+	"(MTOOL","T",list_tool_number,mtool_type,"D",tool_diameter,"H",tool_length,mtool_angle,mtool_corner_rad,"DIAM_OFFSET ",list_tool_number,"= ",tool_radius,")"
+
+111. Rotary Rewind Before Tool Change Block.
+
+113. Canned cycle drill point format for high speed peck drill canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+114. Canned cycle drill point format for left handed tapping canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+116. Canned cycle drill point format for fine boring canned cycle NO SUBPROGRAMS.
+	n,x_f,y_f,p_rot,s_rot
+
+152. Line rapid move XY.
+	n,rapid_move,xr,p_rot,s_rot
+
+153. Line feed move XY.
+	n,feed_move,feed_mode,rotary_xy_f,p_rot,s_rot,feed_rate
+
+154. Line rapid move XYZ.
+	n,rapid_move,xr,p_rot,s_rot,zr
+
+155. Line feed move XYZ.
+	n,feed_move,feed_mode,rotary_xy_f,p_rot,s_rot,z_f,feed_rate
+
+156. Line feed move XY on Leadin.
+	n,cc,feed_move,feed_mode,rotary_xy_f,p_rot,s_rot,feed_rate
+
+157. Line feed move XY on Leadout.
+	n,cc,feed_move,feed_mode,rotary_xy_f,p_rot,s_rot,feed_rate
+
+164. Arc move.
+	n,g_arc_move,p_rot,s_rot,arc_center,feed_rate
+
+170. High speed peck drill canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,program_block_1,dwell
+
+171. Left handed tapping canned cycle.
+	rigid_tapping_start
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane
+
+172. Fine boring canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,program_block_1,dwell
+
+173. Drill canned cycle cancel.
+
+174. Standard drill canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane
+
+175. Standard drill canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,dwell
+
+176. Peck drill canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,program_block_1
+
+177. Tapping canned cycle.
+	rigid_tapping_start
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane
+
+178. Boring cycle #1 canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane
+
+179. Boring cycle #2 canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane
+
+180. Back boring cycle canned cycle.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,program_block_1,dwell
+
+181. Boring cycle #1 canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,dwell
+
+182. Boring cycle #2 canned cycle with dwell.
+	n,g98_g99,g_canned_cycle,rotary_xy_f,p_rot,s_rot,drill_depth,reference_plane,dwell
+
+183. Canned cycle drill point format for standard drill canned cycle NO SUBPROGRAMS.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+184. Canned cycle drill point format high speed peck drill with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+185. Canned cycle drill point format left hand tapping with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+186. Canned cycle drill point format fine boring with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+187. Canned cycle drill point format standard drill with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+188. Canned cycle drill point format standard drill with dwell with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+189. Canned cycle drill point format peck drill with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+190. Canned cycle drill point format point tap with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+191. Canned cycle drill point format boring 1 with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+192. Canned cycle drill point format boring 2 with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+193. Canned cycle drill point format back boring (boring 3) with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+194. Canned cycle drill point format boring 1 with dwell with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+195. Canned cycle drill point format boring 2 with dwell with wrap.
+	n,rotary_xy_f,p_rot,s_rot,zr_no_output
+
+197. End of Operation Toolchange.
+	n,spindle_off
+	n,optional_stop
+
+198. End of Operation No Toolchange.
+
+199. End of Last Operation.
+	n,spindle_off
+
+200. Is X modal? y
+201. Is Y modal? y
+202. Is Z modal? y
+203. Are the g codes modal? n
+204. Are the g codes (G02 and G03) modal in arc milling? n
+205. Are the xy (or yz or xz) coordinates modal in arc milling? n
+206. Are work coordiantes modal ? n
+207. Output sequence numbers in subprograms ? n
+208. Output sequence numbers? y
+209. Number of places for sequence numbers? 2
+210. Delete the decimal point? n
+211. Delete leading zeros? n
+212. Delete trailing zeros? y
+213. English or Metric format (E/M)? E
+214. Places before decimal point for reals (X, Y, Z)? 1
+215. Number of places for Tool Numbers? 2
+216. Places after decimal for feedrate ? 1
+217. Scale factor for feedrate ? 1
+218. Number of Places for Program Number? 4
+219. Add spaces to the program? y
+
+221. Break arcs into quadrants? n
+222. Arc center a=absolute, b=incremental, d=unsigned inc., e=radius? b
+223. Break arcs into two pieces if greater than 180 degrees? n
+228. Support Unicode Output? y
+
+230. Use Standard drilling canned cycle? y
+231. Use peck drill canned cycle? n
+232. Use High speed peck drill canned cycle? y
+233. Use tapping canned cycle? n
+234. Use boring cycle #1 canned cycle? y
+235. Use boring cycle #2 canned cycle? y
+236. Use back boring cycle canned cycle? n
+237. Use left hand tap cycle canned cycle? n
+238. Use fine boring cycle canned cycle? n
+
+240. Amount to add to t to obtain t1? 0
+241. Amount to add to t to obtain t2? 0
+242. Value of t1 at t = 0? 0
+243. Value of t2 at t = 0? 0
+258. Maximum number of work offsets? 1
+262. Add sign to all coordinate values? n
+267. Amount to add to tool # for tool register value? 0
+
+272. Rigid tapping? n
+
+273. Output programmable rotary axis codes? y
+280. Primary Rotary Axis Modal? y
+281. Secondary Rotary Axis Modal? y
+
+315. Minimum part heigth? 0.00000
+
+319. Break Arcs with Radius Larger than? 9999.9999
+320. Arc segment breaking tolerance? 0.001
+321. Line segment max length? 999.99
+
+322. Maximum inverse feedrate? 9999.99
+323. Minimum inverse feedrate? 0.0
+
+414. Number of decimal places for metric numbers ? 3
+415. Number of decimal places for english numbers? 4
+425. Number of decimal for angles? 3
+426. Number of leading decimal places for angles? 1
+
+427. Tapping feed rate (1=ipm  2=ipr)? 1
+428. Feed rates other than tapping (1=ipm 2=ipr)? 1
+429. Maximum spindle speed for tapping? 20000
+430. Maximum spindle speed? 20000
+431. Spindle speed for high range? 20000
+
+432. Add amount for tool number in tool list? 0
+
+433. Maximum sequence number allowed (used when #534 is y)? 999999
+
+440. What is the rotary output type (0=Abs Pos, 1=Signed ABS, 2=Signed Continuous)? 2
+441. Multiaxis feed type (0=UPM 1=INV on all 2=INV on Rotary 3=INV on 4 and 5 Axis 4=DPM on Rotary Only 5=DPM on Rotary with Linear)? 0
+442. Wrapping X axis is (1=primary, 2=secondary, 3=tertiary)? 1
+443. Wrapping Y axis is (1=primary, 2=secondary, 3=tertiary)? 2
+444. Wrapping Z axis is (1=primary, 2=secondary, 3=tertiary)? 3
+445. Rewind Rotary Axes at Tool Change? y
+
+446. Are Arc Centers Modal? y
+
+511. Use incremental coordinates? n
+512. Use block delete for stop codes (M00)? n
+513. Output F feedrate values? n
+515. Output G99 instead of G98 in drilling? n
+516. Output G98/G99 in drilling? y
+518. Output M00 codes? n
+526. Start renumbering from start number for subprograms? n
+527. Create subdirectory for nc file? n
+531. Replace spaces in comment with commas ? n
+533. Output suprograms at the beginning of the program? n
+534. Re-Start sequence numbering once max sequence number is reached? n
+535. Are Feed Rates modal? y
+536. Force all codes to upper case ? y
+540. Check each output line with scripting? n
+
+550. Break arc segments into lines (Make sure to adjust value in block 319)? n
+551. Break line segments into smaller lines? n
+552. Support only G17 Arcs? n
+553. Break Helix into Lines? n
+554. Convert small arcs to lines (arc length to be specified in block 555.)? n
+555. Small arc length to break? 0.0025
+
+605. Spindle speed prefix? "S"
+606. Feedrate prefix? "F"
+607. Dwell prefix? "P"
+610. Miscellaneous end of file string? ""
+613. Pattern contour subprogram start code? ""
+614. Inch mode machining? "G20"
+615. Metric mode machining? "G21"
+620. Absolute coordinates? "G90"
+621. Incremental coordinates? "G91"
+622. Coordinate zero set? "G92"
+625. End of file? "M2"
+626. Stop? "M0"
+627. Optional Stop? "M1"
+628. Subprogram call? ""
+629. Subprogram return? ""
+630. Comment Start? "("
+631. Comment End? ")"
+639. Cancel Cutter Compensation? "G40"
+640. Prefix for arc Z center? "K"
+641. Prefix for radius values? "R"
+642. Prefix for arc X center? "I"
+643. Prefix for arc Y center? "J"
+645. Subprogram prefix? "P"
+646. Machine maker? "CNC MASTERS"
+647. Machine model? "MAX"
+648. Part Height prefix? "None"
+649. Reference Plane prefix? "R"
+650. Cutter Compensation Left Code? "G41"
+651. Cutter Compensation Right Code? "G42"
+652. Machine Coordinate Code? ""
+653. Machine Home Code? ""
+654. Tool Change Code? ""
+655. G-Code for Dwell? ""
+
+656. Block delete? "/"
+658. Subprogram call subnumber prefix? "P"
+659. Add these characters to the end of each line? ""
+670. Spindle forward string? "M3"
+671. Spindle reverse string? "M4"
+672. Spindle off string? "M5"
+673. Coolant on string? "M8"
+674. Coolant off String? "M9"
+675. First peck prefix? "I"
+676. Peck drill prefix? "Q"
+677. Drill depth prefix? "Z"
+678. Cutter offset prefix? "D"
+679. Cancel drilling canned cycle? "G80"
+
+680. GCode for Rapid Move? "G0"
+681. GCode for Feed Move? "G1"
+682. GCode for Arc CW? "G2"
+683. GCode for Arc CCW? "G3"
+
+684. Prefix for X Move? "X"
+685. Prefix for Y Move? "Y"
+686. Prefix for Z Move? "Z"
+
+687. Prefix for drill canned cycle feed rate? "F"
+688. Prefix for tool length offset? "H"
+689. Prefix for initial plane? "I"
+690. Prefix for X Rotation Move? "W"
+691. Prefix for XY Machining Plane? "G17"
+692. Prefix for XZ Machining Plane? "G18"
+693. Prefix for YZ Machining Plane? "G19"
+694. Prefix for Y Rotation Move? "B"
+
+695. Prefix for tapping feed rate (variable tapping_feedrate)? "FF"
+696. Prefix for tapping spindle speed (variable tapping_spindle_speed)? "SS"
+697. Prefix for threads per inch (variable threads_per_inch)? "?"
+698. Prefix for thread lead (variable thread_lead)? "?"
+699. Prefix for Tool Angle (variable mtool_angle)? "A"
+700. Prefix for Tool CornerRadius (variable mtool_corner_rad)? "C"
+701. Prefix for Tool Type (variable mtool_type)? "S"
+702. Prefix for rotation axis (variable rotation_axis)? "S"
+703. Prefix for rotary stock diameter (variable rotary_stock_diameter)? "D"
+704. Prefix for rotary stock length (variable rotary_stock_length)? "L"
+705. Prefix for Z Feed Rate? "F"
+706. Coolant Mist code? "M7"
+707. Coolant Air code? "M7"
+708. Coolant Oil code? "M7"
+710. Primary Rotary CW direction code? "M13"
+711. Primary Rotary CCW direction code? "M14"
+712. Secondary rotary CW direction code? "M113"
+713. Secondary rotary CCW direction code? "M114"
+714. Inverse feedrate machining? "G93"
+715. Feed per minute machining? 
+716. Primary rotary axis clamp on? "M10"
+717. Primary rotary axis clamp off? "M11"
+718. Secondary rotary axis clamp on? "M110"
+719. Secondary rotary axis clamp off? "M111"
+720. RTCP code ON? "G43.4"
+721. RTCP code OFF? "G49"
+722. Primary Rotary prefix string? "A"
+723. Secondary Rotary prefix string? "B"
+724. Third Rotary Prefix String? ""
+725. Rotary forward direction string? "+"
+726. Rotary reverse direction string? "-"
+727. Retract to initial position? "G98"
+728. Retract to R Plane? "G99"
+729. Feed Mode UPR Code? ""
+730. Origin tracking on Code? ""
+731. Origin tracking off Code? ""
+
+750. Laser-Plasma-Waterjet Cutter Width Prefix? ""
+751. Laser-Plasma-Waterjet Pierce Height Z Location Prefix? ""
+752. Laser-Plasma-Waterjet Cutter On Code? ""
+753. Laser-Plasma-Waterjet Cutter Off Code? ""
+760. Laser-Plasma Gas Assist On? ""
+761. Laser-Plasma Gas Assist Off? ""
+762. Laser-Plasma Gas Assist With Air? ""
+763. Laser-Plasma Gas Assist With Oxygen? ""
+764. Laser-Plasma Gas Assist With Oxyacetylene? ""
+765. Laser-Plasma Shutter Open? ""
+766. Laser-Plasma Shutter Closed? ""
+767. Laser-Plasma Pulse Frequency Prefix? ""
+768. Laser-Plasma Power Setting Prefix? ""
+769. Laser-Plasma Torch Height Control Prefix? ""
+780. Waterjet Abrasive ON? ""
+781. Waterjet Abrasive OFF? ""
+782. Waterjet Vacuuum Assist ON? ""
+783. Waterjet Vacuuum Assist OFF? ""
+784. Waterjet Pressure Low? ""
+785. Waterjet Pressure Medium? ""
+786. Waterjet Pressure High? ""
+
+800. Standard drilling cycle no dwell #1? "G81"
+801. Peck drill cycle no dwell #2? ""
+802. High speed peck drill cycle no dwell #3? "G73"
+803. Tapping cycle no dwell #4? ""
+804. Boring cycle #1 no dwell #5? "G85"
+805. Boring cycle #2 no dwell #6? "G85"
+806. Back boring cycle no dwell #7? "G87"
+807. Left hand tapping cycle no dwell #8? ""
+808. Fine boring cycle no dwell #9? ""
+
+820. Standard drilling cycle with dwell #1? "G82"
+821. Peck drill cycle with dwell #2? ""
+822. High speed peck drill cycle with dwell #3? "G73"
+823. Tapping cycle with dwell #4? ""
+824. Boring cycle #1 with dwell #5? "G86"
+825. Boring cycle #2 with dwell #6? "G89"
+826. Back boring cycle with dwell #7? ""
+827. Left hand tapping cycle with dwell #8? ""
+828. Fine boring cycle with dwell #9? ""
+
+900. Work shift #1? ""
+901. Work shift #2? ""
+902. Work shift #3? ""
+903. Work shift #4? ""
+904. Work shift #5? ""
+905. Work shift #6? ""
+906. Work shift #7? ""
+907. Work shift #8? ""
+908. Work shift #9? ""
+909. Work shift #10? ""
+910. Work shift #11? ""
+911. Work shift #12? ""
+912. Work shift #13? ""
+913. Work shift #14? ""
+914. Work shift #15? ""
+915. Work shift #16? ""
+916. Work shift #17? ""
+917. Work shift #18? ""
+918. Work shift #19? ""
+919. Work shift #20? ""
+920. Work shift #21? ""
+921. Work shift #22? ""
+922. Work shift #23? ""
+923. Work shift #24? ""
+924. Work shift #25? ""
+925. Work shift #26? ""
+926. Work shift #27? ""
+927. Work shift #28? ""
+928. Work shift #29? ""
+929. Work shift #30? ""
+930. Work shift #31? ""
+931. Work shift #32? ""
+932. Work shift #33? ""
+933. Work shift #34? ""
+934. Work shift #35? ""
+935. Work shift #36? ""
+936. Work shift #37? ""
+937. Work shift #38? ""
+938. Work shift #39? ""
+939. Work shift #40? ""
+940. Work shift #41? ""
+941. Work shift #42? ""
+942. Work shift #43? ""
+943. Work shift #44? ""
+944. Work shift #45? ""
+945. Work shift #46? ""
+946. Work shift #47? ""
+947. Work shift #48? ""
+948. Work shift #49? ""
+949. Work shift #50? ""
+950. Work shift #51? ""
+951. Work shift #52? ""
+952. Work shift #53? ""
+953. Work shift #54? ""
+954. Work shift #54? ""
+955. Work shift #55? ""
+956. Work shift #56? ""
+957. Work shift #57? ""
+958. Work shift #58? ""
+959. Work shift #59? ""
+960. Work shift #60? ""
+961. Work shift #61? ""
+962. Work shift #62? ""
+963. Work shift #63? ""
+964. Work shift #64? ""
+965. Work shift #65? ""
+966. Work shift #66? ""
+967. Work shift #67? ""
+968. Work shift #68? ""
+969. Work shift #69? ""
+970. Work shift #70? ""
+971. Work shift #71? ""
+972. Work shift #72? ""
+973. Work shift #73? ""
+974. Work shift #74? ""
+975. Work shift #75? ""
+976. Work shift #76? ""
+977. Work shift #77? ""
+978. Work shift #78? ""
+979. Work shift #79? ""
+980. Work shift #80? ""
+981. Work shift #81? ""
+982. Work shift #82? ""
+983. Work shift #83? ""
+984. Work shift #84? ""
+985. Work shift #85? ""
+986. Work shift #86? ""
+987. Work shift #87? ""
+988. Work shift #88? ""
+989. Work shift #89? ""
+990. Work shift #90? ""
+991. Work shift #91? ""
+992. Work shift #92? ""
+993. Work shift #93? ""
+994. Work shift #94? ""
+995. Work shift #95? ""
+996. Work shift #96? ""
+997. Work shift #97? ""
+998. Work shift #98? ""
+999. Work shift #99? ""
+
+2001. Program Block 1. Return peck increment as a negative number
+	Dim PeckIncrement : PeckIncrement = -1 * MILL_GetPeckDrillIncrement()
+	
+	MILL_SetReturnString(" Q" & PeckIncrement)
+	
+2002. Program Block 2.
+	
+2003. Program Block 3.
+	
+2004. Program Block 4.
+	
+2005. Program Block 5.
+	
+2006. Program Block 6.
+	
+2007. Program Block 7.
+	
+2008. Program Block 8.
+	
+2009. Program Block 9.
+	
+2010. Program Block 10.
+	
+2011. Program Block 11.
+	
+2012. Program Block 12.
+	
+2013. Program Block 13.
+	
+2014. Program Block 14.
+	
+2015. Program Block 15.
+	
+2016. Program Block 16.
+	
+2017. Program Block 17.
+	
+2018. Program Block 18.
+	
+2019. Program Block 19.
+	
+2020. Program Block 20.
+	
+2021. Program Block 21.
+	
+2022. Program Block 22.
+	
+2023. Program Block 23.
+	
+2024. Program Block 24.
+	
+2025. Program Block 25.
+	
+2026. Program Block 26.
+	
+2027. Program Block 27.
+	
+2028. Program Block 28.
+	
+2029. Program Block 29.
+	
+2030. Program Block 30.
+	
+2031. Program Block 31.
+	
+2032. Program Block 32.
+	
+2033. Program Block 33.
+	
+2034. Program Block 34.
+	
+2035. Program Block 35.
+	
+2036. Program Block 36.
+	
+2037. Program Block 37.
+	
+2038. Program Block 38.
+	
+2039. Program Block 39.
+	
+2040. Program Block 40.
+	
+2041. Program Block 41.
+	
+2042. Program Block 42.
+	
+2043. Program Block 43.
+	
+2044. Program Block 44.
+	
+2045. Program Block 45.
+	
+2046. Program Block 46.
+	
+2047. Program Block 47.
+	
+2048. Program Block 48.
+	
+2049. Program Block 49.
+	
+2050. Program Block 50.
+	
+2051. Program Block 51.
+	
+2052. Program Block 52.
+	
+2053. Program Block 53.
+	
+2054. Program Block 54.
+	
+2055. Program Block 55.
+	
+2056. Program Block 56.
+	
+2057. Program Block 57.
+	
+2058. Program Block 58.
+	
+2059. Program Block 59.
+	
+2060. Program Block 60.
+	
+2061. Program Block 61.
+	
+2062. Program Block 62.
+	
+2063. Program Block 63.
+	
+2064. Program Block 64.
+	
+2065. Program Block 65.
+	
+2066. Program Block 66.
+	
+2067. Program Block 67.
+	
+2068. Program Block 68.
+	
+2069. Program Block 69.
+	
+2070. Program Block 70.
+	
+2071. Program Block 71.
+	
+2072. Program Block 72.
+	
+2073. Program Block 73.
+	
+2074. Program Block 74.
+	
+2075. Program Block 75.
+	
+2076. Program Block 76.
+	
+2077. Program Block 77.
+	
+2078. Program Block 78.
+	
+2079. Program Block 79.
+	
+2080. Program Block 80.
+	
+2081. Program Block 81.
+	
+2082. Program Block 82.
+	
+2083. Program Block 83.
+	
+2084. Program Block 84.
+	
+2085. Program Block 85.
+	
+2086. Program Block 86.
+	
+2087. Program Block 87.
+	
+2088. Program Block 88.
+	
+2089. Program Block 89.
+	
+2090. Program Block 90.
+	
+2091. Program Block 91.
+	
+2092. Program Block 92.
+	
+2093. Program Block 93.
+	
+2094. Program Block 94.
+	
+2095. Program Block 95.
+	
+2096. Program Block 96.
+	
+2097. Program Block 97.
+	
+2098. Program Block 98.
+	
+2099. Program Block 99.
+	
+2101. Read entire file after post.
+	
+2102. Read each line on output (if line 540 is set to Y).
+
+2103. VB Script Line by Line
