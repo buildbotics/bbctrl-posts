@@ -1,0 +1,52 @@
+<machine_definition>
+    <machine_data name="Buildbotics_OEM_3x_Mill" version="1.700000" units="inch" />
+    <axis id="Y" type="translation" x="0.000000" y="-1.000000" z="0.000000" minvalue="-12.000000" maxvalue="12.000000" valuetype="cont" initial_value="0.000000">
+        <axis id="X" type="translation" x="-1.000000" y="0.000000" z="0.000000" minvalue="-28.000000" maxvalue="28.000000" valuetype="cont" initial_value="0.000000">
+            <transform id="workpiece_transform" initialvalue="1.00000000,0.00000000,0.00000000,0.0000000000,0.00000000,1.00000000,0.00000000,0.0000000000,0.00000000,0.00000000,1.00000000,0.0000000000,0.00000000,0.00000000,0.00000000,1.00000000">
+                <geometry name="workpiece" geo="workpiece.stl" clrr="0.749020" clrg="0.749020" clrb="0.749020" alpha="0.000000" reflectivity="0.000000" reflectivityBitmapFileName="" objtype="workpiece" />
+                <geometry name="fixture" geo="fixture.stl" clrr="0.501961" clrg="0.501961" clrb="0.501961" alpha="0.000000" reflectivity="0.000000" reflectivityBitmapFileName="" objtype="fixture" />
+                <geometry name="stock" geo="stock.stl" clrr="0.431373" clrg="0.658824" clrb="1.000000" alpha="0.000000" reflectivity="0.000000" reflectivityBitmapFileName="" objtype="stock" />
+                <geometry name="toolpath" geo="" clrr="0.000000" clrg="0.000000" clrb="1.000000" alpha="0.000000" reflectivity="0.000000" reflectivityBitmapFileName="" objtype="toolpath" />
+                <geometry name="initialstock" geo="istock.stl" clrr="0.431373" clrg="0.658824" clrb="1.000000" alpha="0.400000" reflectivity="0.000000" reflectivityBitmapFileName="" objtype="initialstock" />
+            </transform>
+        </axis>
+    </axis>
+    <axis id="Z" type="translation" x="0.000000" y="0.000000" z="1.000000" minvalue="0.000000" maxvalue="24.000000" valuetype="cont" initial_value="24.000000">
+        <transform id="holder_transform" initialvalue="1.00000000,0.00000000,0.00000000,0.0000000000,0.00000000,1.00000000,0.00000000,0.0000000000,0.00000000,0.00000000,1.00000000,0.0000000000,0.00000000,0.00000000,0.00000000,1.00000000">
+            <geometry name="tool" geo="" alpha="0.000000" reflectivity="0.400000" reflectivityBitmapFileName="TableReflection.bmp" objtype="tool" cuttr="1.000000" cuttg="0.501961" cuttb="0.000000" cuttrefl="-0.000000" noncuttr="0.749020" noncuttg="0.749020" noncuttb="0.749020" noncuttrefl="0.000000" arborr="0.392157" arborg="0.392157" arborb="0.392157" arborrefl="0.000000" holderr="0.000000" holderg="0.000000" holderb="1.000000" holderrefl="0.000000" />
+        </transform>
+    </axis>
+    <collcheck id="cc" name="cc" group1="fixture,workpiece" dynamic1="false" dynamic2="false" active="true" group2="tool" />
+</machine_definition>
+<bobcad_definition>
+    <machine>
+        <machine_model version="1.000000" type="mill" axis="3" rot="0" units="inch" autoToolNumberingByDevice="0" />
+        <post_processor name="Buildbotics_OEM_3x_Mill.BCPst" />
+        <cutting_conditions name="CuttingConditions.ccond" allow="true" output="false" />
+        <tool_pattern name="ToolPattern.tpatt" />
+        <nc_filepath name="" />
+        <nc_extension name=".ngc" />
+        <machine_params toolChangePosition="15.000000" toolChangeTime="5.000000" maxSpindle="20000.000000" maxFeed="500.000000" rapid="1800.000000" maxTools="24" />
+        <posting_params programNum="100" outputAbsoluteIncrementalType="1" subProgramStartNumber="10" subProgramNumberInc="1" lineStartNumber="1" lineNumberInc="1" useTransform="0" useTransformOrigin="0" does_dogleg_rapids="0" />
+        <sub_programs use="false" AppliedToOperation="false" />
+        <comments use="true" />
+        <multiaxis arcs="false" />
+        <lathe_toolpath_output type="0" />
+    </machine>
+    <multi_post_settings>
+        <angle_pair start="select" Angle="0.000000" use="first" auto="true" other="true" TransAxisUse="FirstPlus" FourAxisAngleUse="0" />
+        <machine_limits type="rot" tol="0.000100" angleChangeLimit="120.000000" />
+        <pole_handling type="smooth" tol="0.010000" />
+        <limit use="false" />
+        <tool_repos retract="100.000000" retractMax="false" />
+        <move_list_writer rot1Limit="none" rot2Limit="none" coords="Machine Compensation in Z only" coords_Index="Machine Compensation in Z only" coords_MultiAxSimul="Machine Compensation in Z only" />
+        <point_interp linearInterp="vector" feedMaxDist="false" feedMaxDistVal="5.000000" feedMaxAngle="false" feedMaxAngleVal="3.000000" rapidMaxDist="false" rapidMaxDistVal="2.500000" rapidMaxAngle="false" rapidMaxAngleVal="10.000000" />
+        <machine_zero type="0" />
+        <RetractAndRewind RetractAndRewindCheck="true" RetractAngleCheck="true" RetractAngleVal="45.000000" />
+    </multi_post_settings>
+    <Machine_Axis_IDs>
+        <Axis_ID id="1" name="Y" />
+        <Axis_ID id="2" name="X" />
+        <Axis_ID id="3" name="Z" />
+    </Machine_Axis_IDs>
+</bobcad_definition>
