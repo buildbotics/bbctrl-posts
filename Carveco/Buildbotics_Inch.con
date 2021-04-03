@@ -1,0 +1,67 @@
+; Buildbotics PostP file
+;
+; === ======== ========================================
+;LA 16/03/21 created for Buildbotics
+;
+; 
+DESCRIPTION = "Buildbotics (inch) (*.ngc)"
+;
+FILE_EXTENSION = "ngc"
+;
+UNITS = INCH
+;
+; Cariage return - line feed at end of each line
+;
+END_OF_LINE = "[13][10]"
+;
+; Spindle Speed
+FORMAT = [S|@|S|1.0]
+; Feed Rate
+FORMAT = [F|#|F|1.1]
+; Tool moves in x,y and z
+FORMAT = [X|#|X|1.3]
+FORMAT = [Y|#|Y|1.3]
+FORMAT = [Z|#|Z|1.3]
+; Arc Center Coords
+FORMAT = [I|@|I|1.3]
+FORMAT = [J|@|J|1.3]
+; Home tool positions 
+FORMAT = [XH|@|X|1.3]
+FORMAT = [YH|@|Y|1.3]
+FORMAT = [ZH|@|Z|1.3]
+;
+;
+; Set up program header
+;
+START = "%"
+START = "T[T] (MSG, Insert Tool [T])"
+START = "G0 G17 G20 G90 G40 G49 G64"
+START = "G0 [ZH]"
+START = "G0 [XH] [YH] M03 [S]"
+START = "M0(MSG, Click 'Continue' when the spindle is up to speed)"
+;
+; Program moves
+;
+FIRST_RAPID_RATE_MOVE  = "G0 [X] [Y] [Z]"
+;
+FIRST_FEED_RATE_MOVE   = "G1 [X] [Y] [Z] [F]"
+FEED_RATE_MOVE         = "[X] [Y] [Z]"
+;
+FIRST_CW_ARC_MOVE      = "G2 [X] [Y] [I] [J] [F]"
+CW_ARC_MOVE            = "G2 [X] [Y] [I] [J]"
+;
+FIRST_CCW_ARC_MOVE     = "G3 [X] [Y] [I] [J] [F]"
+CCW_ARC_MOVE           = "G3 [X] [Y] [I] [J]"
+;
+NEW_SEGMENT_POST_TOOLCHANGE= "G0 [Z] M03 [S]"	
+NEW_SEGMENT_POST_TOOLCHANGE= "M0(MSG, Click 'Continue' when the spindle is up to speed)"
+;
+;Setup Toolchange Commands
+;
+;
+; End of file
+;
+END = "M05"
+END = "G0 [ZH]"
+END = "G0 [XH] [YH]"
+END = "M02"
