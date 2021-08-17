@@ -58,6 +58,10 @@ NEW_SEGMENT_POST_TOOLCHANGE= "M0(MSG, Click 'Continue' when the spindle is up to
 ;
 ;Setup Toolchange Commands
 ;
+TOOLCHANGE = "G0 [ZH]"
+TOOLCHANGE = "G0 [XH] [YH]"
+TOOLCHANGE = "M05"
+TOOLCHANGE = "M06 T[T]"
 ;
 ; End of file
 ;
