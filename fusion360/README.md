@@ -25,7 +25,7 @@ puts this simulation in the comments in the g-code file.
 
 The following two spindle control properties were added by Vincet Schmidt. Thanks Vincent!
 
-<img src = "image/spindle_properties.png">
+<img src = "images/spindle_properties.png">
 
 > "Spindle Delay" was added to insert a delay, specified in seconds, after the spindle start command has been issued (M3). This is useful if you experience issues with your spindle not reaching the desired speed quickly enough before engaging with the material.
 
