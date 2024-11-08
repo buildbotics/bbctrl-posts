@@ -23,6 +23,14 @@ puts this simulation in the comments in the g-code file.
 
 "Disable coolant control" feature was added so users that want to use the Load1 or Load2 outputs for something other than coolant control, or to just manually control coolant can prevent F360 from generating coolant control commands in the GCode. The default value for this field is "No", meaning that coolant control is not disabled. Set this field to "Yes" to turn off coolant control commands in F360.
 
+The following two spindle control properties were added by Vincet Schmidt. Thanks Vincent!
+
+<img src = "image/spindle_properties.png">
+
+> "Spindle Delay" was added to insert a delay, specified in seconds, after the spindle start command has been issued (M3). This is useful if you experience issues with your spindle not reaching the desired speed quickly enough before engaging with the material.
+
+> "Spindle Confirmation" feature was added to insert a pause with a prompt (M0) after the spindle start command (M3). This lets users manually confirm if the spindle is running correctly before continuing with their program.
+
 Modified the writeRetact program to simply make a rapid move (G0) to the retract height specified by the "Set Z-Axis retract height value".
 
 ## Probing support added on 10/10/19
